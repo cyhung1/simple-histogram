@@ -4,13 +4,15 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Windows;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using WpfSimpleHistogram.Interface;
 
 namespace WpfSimpleHistogram.Model
 {
-    public class WpfSimpleHistogramViewModel : INotifyPropertyChanged
+    public class HistogramViewModel : INotifyPropertyChanged
     {
         string _xLabel;
         public string XLabel
@@ -44,20 +46,19 @@ namespace WpfSimpleHistogram.Model
             }
         }
 
-        double _binSize = -1;
-        public double BinSize
+        double? _binSize = null;
+        public double? BinSize
         {
             set
             {
-                _binSize = value;
+                _binSize = value <= 0 ? null : value;
                 DrawGraph(_itemsSource, (Decimal)BinSize);
             }
             private get
             {
-                if (_binSize == -1)
+                if (_binSize == null)
                 {
-                    var binNum = (int)Math.Sqrt(_itemsSource.Count());
-                    _binSize = binNum == 0 ? 1.0 : (_itemsSource.Select(i => i.XValue).Max() - _itemsSource.Select(i => i.XValue).Min()) / (double)binNum;
+                    return GetProperBinSize();
                 }
                 return _binSize == 0 ? 1.0 : _binSize;
             }
@@ -69,10 +70,42 @@ namespace WpfSimpleHistogram.Model
         public string[] Labels { get; private set; }
         public string[] CurveAxisLabels { get; private set; }
 
-        public WpfSimpleHistogramViewModel()
+        Visibility _bellCurveVisibilyty = Visibility.Visible;
+        public Visibility BellCurveVisibility
+        {
+            get { return _bellCurveVisibilyty; }
+            set
+            {
+                _bellCurveVisibilyty = value;
+                RaisePropertyChanged("BellCurveVisibility");
+            }
+        }
+
+        public HistogramViewModel()
         {
             Formatter = value => value.ToString("0.0");
             SeriesCollection = new SeriesCollection();
+        }
+
+        double GetProperBinSize()
+        {
+            if (_itemsSource == null || _itemsSource.Count() < 2) return 1;
+            var binNum = Math.Sqrt(_itemsSource.Count());
+
+            var min = _itemsSource.Select(i => i.XValue).Min();
+            var max = _itemsSource.Select(i => i.XValue).Max();
+
+            var cands = new Decimal[] { 1, 2, 5 };
+            for (Decimal d = 0.01m; d <= 100000m; d *= 10)
+            {
+                foreach (var c in cands)
+                {
+                    var ret = (double)c * (double)d;
+                    if ((max - min) / ret <= binNum) return ret;
+                }
+            }
+
+            return 10000000;
         }
 
         List<Bin> _binItems;
@@ -103,12 +136,13 @@ namespace WpfSimpleHistogram.Model
             }
 
             var sortedItems = items.OrderBy(i => i.XValue).ToList();
-            var val = (Decimal)sortedItems[0].XValue;
+
+            var val = GetStartVal((Decimal)sortedItems[0].XValue, binSize);
             ret.Add(new Bin(val, val + binSize));
 
             for (int i = 0; i < sortedItems.Count(); i++)
             {
-                if ((Decimal)sortedItems[i].XValue >= ret.Last().Right)
+                while ((Decimal)sortedItems[i].XValue >= ret.Last().Right)
                 {
                     val += binSize;
                     ret.Add(new Bin(val, val + binSize));
@@ -117,6 +151,24 @@ namespace WpfSimpleHistogram.Model
             }
 
             return ret;
+        }
+
+        Decimal GetStartVal(Decimal minVal, Decimal binSize)
+        {
+            if (minVal == 0) return minVal;
+
+            if (minVal > 0)
+            {
+                Decimal ret_pos = 0;
+                while (ret_pos <= minVal) ret_pos += binSize;
+                return ret_pos - binSize;
+            }
+            else
+            {
+                Decimal ret_neg = 0;
+                while (ret_neg >= minVal) ret_neg -= binSize;
+                return ret_neg;
+            }
         }
 
         // [Left, Right)
@@ -174,24 +226,35 @@ namespace WpfSimpleHistogram.Model
             var stdDev = Math.Sqrt(variance);
             var a = 1.0 / (stdDev * Math.Sqrt(2.0 * Math.PI));
 
-            SeriesCollection.Add(new LineSeries()
+            var lineSeries = new LineSeries()
             {
                 Values = new ChartValues<double>(bLabels.Select(v => GetGaussian(v, a, u, stdDev, (double)(bins[0].Right - bins[0].Left), (double)allValues.Count()))),
                 ScalesXAt = 1,
                 LineSmoothness = 1, //smooth
                 PointGeometry = null,
                 Fill = Brushes.Transparent,
-            });
+            };
+            lineSeries.SetBinding(LineSeries.VisibilityProperty, new Binding("BellCurveVisibility") { Source = this });
+
+            SeriesCollection.Add(lineSeries);
         }
 
         double GetGaussian(double x, double a, double u, double stdDev, double binSize, double numOfRec)
         {
-            return a * Math.Exp((-Math.Pow(x - u, 2.0)) / (2.0 * stdDev * stdDev)) * binSize * numOfRec;
+            var ret = a * Math.Exp((-Math.Pow(x - u, 2.0)) / (2.0 * stdDev * stdDev)) * binSize * numOfRec;
+            return Math.Max(0, ret);
         }
 
         List<double> GetBellLabels(List<Bin> bins)
         {
-            const int INTERNAL_POINT_NUM = 10;
+            int INTERNAL_POINT_NUM = 10;
+
+            if (bins.Count() < 2) INTERNAL_POINT_NUM = 500;
+            if (bins.Count() < 3) INTERNAL_POINT_NUM = 150;
+            if (bins.Count() < 5) INTERNAL_POINT_NUM = 100;
+            if (bins.Count() < 10) INTERNAL_POINT_NUM = 30;
+            if (bins.Count() > 100) INTERNAL_POINT_NUM = 4;
+            if (bins.Count() > 500) INTERNAL_POINT_NUM = 2;
 
             var ret = new List<double>();
             if (bins.Count() <= 0) return ret;
@@ -217,6 +280,12 @@ namespace WpfSimpleHistogram.Model
         public IEnumerable<IHistogramItem> GetClickedItems(double xIdx)
         {
             return _binItems == null || (int)xIdx < 0 || (int)xIdx >= _binItems.Count() ? null : _binItems[(int)xIdx].Items;
+        }
+
+        public List<Tuple<Decimal, Decimal, int>> GetStatistic()
+        {
+            return _binItems == null ? new List<Tuple<Decimal, Decimal, int>>() :
+                _binItems.Select(b => new Tuple<Decimal, Decimal, int>(b.Left, b.Right, b.Items.Count())).ToList();
         }
 
         #region INotifyPropertyChanged

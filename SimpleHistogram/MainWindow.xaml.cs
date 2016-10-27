@@ -60,7 +60,7 @@ namespace SimpleHistogram
 
         private void WpfSimpleHistogram_BarClicked(object sender, RoutedEventArgs e)
         {
-            var histogram = sender as WpfSimpleHistogram.View.WpfSimpleHistogram;
+            var histogram = sender as WpfSimpleHistogram.Histogram;
             var items = histogram.ClickeddItems;
 
             MessageBox.Show("This bar contains " + items.Count() + " items", "Bar clicked");

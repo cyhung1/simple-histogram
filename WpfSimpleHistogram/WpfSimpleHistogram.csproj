@@ -50,14 +50,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Interface\IHistogramItem.cs" />
-    <Compile Include="Model\WpfSimpleHistogramViewModel.cs" />
+    <Compile Include="Model\HistogramViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="View\WpfSimpleHistogram.xaml.cs">
-      <DependentUpon>WpfSimpleHistogram.xaml</DependentUpon>
+    <Compile Include="Histogram.xaml.cs">
+      <DependentUpon>Histogram.xaml</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Page Include="View\WpfSimpleHistogram.xaml">
+    <Page Include="Histogram.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
