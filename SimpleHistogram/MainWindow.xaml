@@ -1,11 +1,36 @@
 ﻿<Window x:Class="SimpleHistogram.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:view="clr-namespace:WpfSimpleHistogram;assembly=WpfSimpleHistogram"
+        xmlns:hist="clr-namespace:WpfSimpleHistogram;assembly=WpfSimpleHistogram"
+        xmlns:view="clr-namespace:SimpleHistogram"
         x:Name="control"
         Title="MainWindow" Height="350" Width="525">
-    <view:Histogram 
-        YLabel="Count" XLabel="Value (mm)" 
-        ItemsSource="{Binding ElementName=control, Path=Items}" BinSize="0.01"
-        BarClicked="WpfSimpleHistogram_BarClicked"/>
+    <Window.Resources>
+        <view:StrToDoubleConv x:Key="StrToDoubleConv"/>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <StackPanel Orientation="Horizontal">
+            <CheckBox IsChecked="True" x:Name="showCurve" VerticalAlignment="Top">
+                Show Curve
+            </CheckBox>
+            <TextBlock Text="Bin Size" Margin="10,0" VerticalAlignment="Top"/>
+            <ComboBox x:Name="binSize" SelectedIndex="0" VerticalAlignment="Top">
+                <ComboBox.Items>
+                    <ComboBoxItem>Auto</ComboBoxItem>
+                    <ComboBoxItem>0.01</ComboBoxItem>
+                    <ComboBoxItem>0.02</ComboBoxItem>
+                    <ComboBoxItem>0.05</ComboBoxItem>
+                    <ComboBoxItem>0.10</ComboBoxItem>
+                </ComboBox.Items>
+            </ComboBox>
+        </StackPanel>
+        <hist:Histogram Grid.Row="1" ShowCurve="{Binding ElementName=showCurve, Path=IsChecked}"
+            YLabel="Count" XLabel="Value (mm)" BinSize="{Binding ElementName=binSize, Path=SelectedValue, Converter={StaticResource StrToDoubleConv}}"
+            ItemsSource="{Binding ElementName=control, Path=Items}" 
+            BarClicked="Histogram_BarClicked"/>
+    </Grid>
 </Window>
