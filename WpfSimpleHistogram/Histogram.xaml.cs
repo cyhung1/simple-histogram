@@ -9,7 +9,7 @@ using System;
 namespace WpfSimpleHistogram
 {
     /// <summary>
-    /// Interaction logic for WpfSimpleHistogram.xaml
+    /// Interaction logic for Histogram.xaml
     /// </summary>
     public partial class Histogram : UserControl
     {
