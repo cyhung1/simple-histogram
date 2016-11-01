@@ -109,14 +109,16 @@ namespace WpfSimpleHistogram.Model
         }
 
         List<Bin> _binItems;
+        List<string> _categories;
         void DrawGraph(IEnumerable<IHistogramItem> items, Decimal binSize)
         {
             if (items == null) return;
             _binItems = GetBinItems(items, binSize);
+            _categories = items.Select(i => i.Category).OrderBy(c => c).Distinct().ToList();
 
             SeriesCollection.Clear();
 
-            DrawHistogram(_binItems);
+            DrawHistogram(_binItems, _categories);
             DrawBellCurve(_binItems);
 
             RaisePropertyChanged("SeriesCollection");
@@ -194,17 +196,35 @@ namespace WpfSimpleHistogram.Model
             }
         }
 
-        void DrawHistogram(List<Bin> bins)
+        void DrawHistogram(List<Bin> bins, IEnumerable<string> categories)
         {
             Labels = bins.Select(s => s.Title).ToArray();
 
-            SeriesCollection.Add(new ColumnSeries()
+            if (categories.Count() <= 1)
             {
-                Title = "",
-                Values = new ChartValues<Int32>(new List<Int32>(bins.Select(b => b.Items.Count()))),
-                ScalesXAt = 0,
-                Cursor = Cursors.Hand,
-            });
+                SeriesCollection.Add(new ColumnSeries()
+                {
+                    Title = categories.FirstOrDefault(),
+                    Values = new ChartValues<Int32>(new List<Int32>(bins.Select(b => b.Items.Count()))),
+                    ScalesXAt = 0,
+                    Cursor = Cursors.Hand,
+                    DataLabels = true,
+                });
+            }
+            else
+            {
+                foreach (var c in categories)
+                {
+                    SeriesCollection.Add(new StackedColumnSeries()
+                    {
+                        Title = c,
+                        Values = new ChartValues<Int32>(new List<Int32>(bins.Select(b => b.Items.Count(i => i.Category == c)))),
+                        ScalesXAt = 0,
+                        Cursor = Cursors.Hand,
+                        DataLabels = true,
+                    });
+                }
+            }
         }
 
         void DrawBellCurve(List<Bin> bins)
@@ -277,9 +297,15 @@ namespace WpfSimpleHistogram.Model
             return ret;
         }
 
-        public IEnumerable<IHistogramItem> GetClickedItems(double xIdx)
+        public IEnumerable<IHistogramItem> GetClickedItems(double xIdx, string category)
         {
-            return _binItems == null || (int)xIdx < 0 || (int)xIdx >= _binItems.Count() ? null : _binItems[(int)xIdx].Items;
+            var items = _binItems == null || (int)xIdx < 0 || (int)xIdx >= _binItems.Count() ? null : _binItems[(int)xIdx].Items;
+            if (items == null) return null;
+            if (category != null)
+            {
+                items = items.Where(i => i.Category == category).ToList();
+            }
+            return items;
         }
 
         public List<Tuple<Decimal, Decimal, int>> GetStatistic()

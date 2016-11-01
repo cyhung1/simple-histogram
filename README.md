@@ -1,4 +1,7 @@
 Implementation of simple Histogram with Bell Curve using <a href="http://lvcharts.net/">Live-Charts</a>. C#/WPF.
 
-<img src="./screenshot1.png"/>
-<img src="./screenshot2.png"/>
+<img src="./single_category.png"/>
+
+<img src="./multiple_category.png"/>
+
+<img src="./bar_clicked.png"/>

@@ -9,5 +9,6 @@ namespace WpfSimpleHistogram.Interface
     public interface IHistogramItem
     {
         double XValue { get; set; }
+        string Category { get; set; }
     }
 }

@@ -54,7 +54,7 @@ namespace WpfSimpleHistogram
             set { SetValue(ItemsSourceProperty, value); }
         }
 
-        public IEnumerable<IHistogramItem> ClickeddItems { get; private set; }
+        public IEnumerable<IHistogramItem> ClickedItems { get; private set; }
 
         public double? BinSize
         {
@@ -110,9 +110,10 @@ namespace WpfSimpleHistogram
 
         void CartesianChart_DataClick(object sender, LiveCharts.ChartPoint chartPoint)
         {
-            var series = chartPoint.SeriesView == null ? null : chartPoint.SeriesView as ColumnSeries;
-            if (series == null) return;
-            ClickeddItems = (this.DataContext as HistogramViewModel).GetClickedItems(chartPoint.X);
+            if (chartPoint.SeriesView == null || (chartPoint.SeriesView.GetType() != typeof(ColumnSeries) && chartPoint.SeriesView.GetType() != typeof(StackedColumnSeries))) return;
+
+            var tgtCategory = chartPoint.SeriesView.GetType() == typeof(StackedColumnSeries) ? (chartPoint.SeriesView as StackedColumnSeries).Title : null;
+            ClickedItems = (this.DataContext as HistogramViewModel).GetClickedItems(chartPoint.X, tgtCategory);
 
             var eventArgs = new RoutedEventArgs(Histogram.BarClickedEvent);
             RaiseEvent(eventArgs);

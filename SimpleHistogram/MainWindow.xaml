@@ -27,6 +27,9 @@
                     <ComboBoxItem>0.10</ComboBoxItem>
                 </ComboBox.Items>
             </ComboBox>
+            <TextBlock Margin="10,0,0,5" Text="Categories:" VerticalAlignment="Top"/>
+            <RadioButton GroupName="dataType" x:Name="singleCategory" Checked="singleCategory_Checked" Unchecked="singleCategory_Checked"  VerticalAlignment="Top">Single</RadioButton>
+            <RadioButton GroupName="dataType" x:Name="multipleCategory" Margin="5,0" VerticalAlignment="Top">Multiple</RadioButton>
         </StackPanel>
         <hist:Histogram Grid.Row="1" ShowCurve="{Binding ElementName=showCurve, Path=IsChecked}"
             YLabel="Count" XLabel="Value (mm)" BinSize="{Binding ElementName=binSize, Path=SelectedValue, Converter={StaticResource StrToDoubleConv}}"
