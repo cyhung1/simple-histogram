@@ -118,8 +118,8 @@ namespace WpfSimpleHistogram.Model
 
             SeriesCollection.Clear();
 
-            DrawHistogram(_binItems, _categories);
             DrawBellCurve(_binItems);
+            DrawHistogram(_binItems, _categories);
 
             RaisePropertyChanged("SeriesCollection");
             RaisePropertyChanged("Labels");
