@@ -205,7 +205,7 @@ namespace WpfSimpleHistogram.Model
                     ScalesXAt = 0,
                     Cursor = Cursors.Hand,
                     DataLabels = true,
-                    ColumnPadding = 0,
+                    ColumnPadding = 0.5,
                     MaxColumnWidth = 1000
                 });
             }
@@ -220,7 +220,7 @@ namespace WpfSimpleHistogram.Model
                         ScalesXAt = 0,
                         Cursor = Cursors.Hand,
                         DataLabels = true,
-                        ColumnPadding = 0,
+                        ColumnPadding = 0.5,
                         MaxColumnWidth = 1000
                     });
                 }
