@@ -83,7 +83,7 @@ namespace WpfSimpleHistogram.Model
 
         public HistogramViewModel()
         {
-            Formatter = value => value.ToString("0.0");
+            Formatter = value => value.ToString("0");
             SeriesCollection = new SeriesCollection();
         }
 
@@ -118,9 +118,9 @@ namespace WpfSimpleHistogram.Model
 
             SeriesCollection.Clear();
 
-            DrawBellCurve(_binItems);
             DrawHistogram(_binItems, _categories);
-
+            DrawBellCurve(_binItems);
+            
             RaisePropertyChanged("SeriesCollection");
             RaisePropertyChanged("Labels");
             RaisePropertyChanged("CurveAxisLabels");
@@ -178,12 +178,8 @@ namespace WpfSimpleHistogram.Model
         {
             public string Title
             {
-                get
-                {
-                    return Left.ToString("0.00") + "-";
-                }
+                get { return Left.ToString("0.00") + "-" + Right.ToString("0.00"); }
             }
-
             public Decimal Left;
             public Decimal Right;
             public List<IHistogramItem> Items;
@@ -209,6 +205,8 @@ namespace WpfSimpleHistogram.Model
                     ScalesXAt = 0,
                     Cursor = Cursors.Hand,
                     DataLabels = true,
+                    ColumnPadding = 0,
+                    MaxColumnWidth = 1000
                 });
             }
             else
@@ -222,6 +220,8 @@ namespace WpfSimpleHistogram.Model
                         ScalesXAt = 0,
                         Cursor = Cursors.Hand,
                         DataLabels = true,
+                        ColumnPadding = 0,
+                        MaxColumnWidth = 1000
                     });
                 }
             }
@@ -270,29 +270,27 @@ namespace WpfSimpleHistogram.Model
             int INTERNAL_POINT_NUM = 10;
 
             if (bins.Count() < 2) INTERNAL_POINT_NUM = 500;
-            if (bins.Count() < 3) INTERNAL_POINT_NUM = 150;
+            if (bins.Count() < 3) INTERNAL_POINT_NUM = 200;
             if (bins.Count() < 5) INTERNAL_POINT_NUM = 100;
-            if (bins.Count() < 10) INTERNAL_POINT_NUM = 30;
+            if (bins.Count() < 10) INTERNAL_POINT_NUM = 50;
             if (bins.Count() > 100) INTERNAL_POINT_NUM = 4;
             if (bins.Count() > 500) INTERNAL_POINT_NUM = 2;
 
             var ret = new List<double>();
             if (bins.Count() <= 0) return ret;
 
-            var gap = ((double)bins[0].Right - (double)bins[0].Left) / (double)INTERNAL_POINT_NUM;
-            ret.Add((double)bins[0].Left - gap);
+            var gap = (bins[0].Right - bins[0].Left) / (decimal)INTERNAL_POINT_NUM;
 
             foreach (var b in bins)
             {
                 ret.Add((double)b.Left);
                 for (int i = 0; i < INTERNAL_POINT_NUM - 1; i++)
                 {
-                    ret.Add((double)b.Left + (double)(i + 1) * gap);
+                    ret.Add((double)(b.Left + (decimal)(i + 1) * gap));
                 }
             }
 
             ret.Add((double)bins.Last().Right);
-            ret.Add((double)bins.Last().Right + gap);
 
             return ret;
         }
