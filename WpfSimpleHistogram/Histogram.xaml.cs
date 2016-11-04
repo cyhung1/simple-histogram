@@ -6,6 +6,7 @@ using WpfSimpleHistogram.Interface;
 using WpfSimpleHistogram.Model;
 using System;
 using System.Windows.Media;
+using LiveCharts.Wpf.Charts.Base;
 
 namespace WpfSimpleHistogram
 {
@@ -115,6 +116,18 @@ namespace WpfSimpleHistogram
         {
             this.DataContext = new HistogramViewModel();
             InitializeComponent();
+
+            Chart.Colors = new List<Color>
+            {
+                Color.FromArgb(0x80, 0x06, 0x97, 0xFB),
+                Color.FromArgb(0x80, 0xd8, 0x3a, 0x3a),
+                Color.FromArgb(0x80, 0x22, 0xbd, 0x3f),
+                Color.FromArgb(0x80, 0xf1, 0xc9, 0x13),
+                Color.FromArgb(0x80, 0x75, 0x5a, 0x9c),
+                Color.FromArgb(0x80, 0x00, 0xdd, 0xdd),
+                Color.FromArgb(0x80, 0xa0, 0x52, 0x2d),
+                Color.FromArgb(0x80, 0xb2, 0xc0, 0xb2),
+            };
         }
 
         void chart_DataClick(object sender, LiveCharts.ChartPoint chartPoint)

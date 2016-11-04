@@ -81,6 +81,13 @@ namespace SimpleHistogram
                 new Item(){ XValue = 0.056, Category = "New York" },
                 new Item(){ XValue = 0.060, Category = "New York" },
                 new Item(){ XValue = 0.071, Category = "New York" },
+                new Item(){ XValue = 0.025, Category = "Tokyo" },
+                new Item(){ XValue = 0.026, Category = "Tokyo" },
+                new Item(){ XValue = 0.029, Category = "Tokyo" },
+                new Item(){ XValue = 0.055, Category = "Tokyo" },
+                new Item(){ XValue = 0.059, Category = "Tokyo" },
+                new Item(){ XValue = 0.061, Category = "Tokyo" },
+                new Item(){ XValue = 0.059, Category = "Tokyo" },
             };
 
             for (int i = 0; i < ret.Count(); i++) (ret[i] as Item).ItemId = i + 1;

@@ -12,6 +12,16 @@
             <Setter Property="Foreground" Value="Black"/>
             <Setter Property="FontSize" Value="16"/>
         </Style>
+        <Style TargetType="lvc:ColumnSeries">
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="Normal"/>
+        </Style>
+        <Style TargetType="lvc:StackedColumnSeries">
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="Normal"/>
+        </Style>
         <lvc:Separator x:Key="cvSeparator"/>
     </UserControl.Resources>
     <lvc:CartesianChart x:Name="chart" Series="{Binding SeriesCollection}" DataClick="chart_DataClick" LegendLocation="Right" UpdaterTick="chart_UpdaterTick">
