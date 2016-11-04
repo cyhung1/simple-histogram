@@ -306,10 +306,20 @@ namespace WpfSimpleHistogram.Model
             return items;
         }
 
-        public List<Tuple<Decimal, Decimal, int>> GetStatistic()
+        //category name => bin infos (left, right, count)
+        public Dictionary<string, List<Tuple<Decimal, Decimal, int>>> GetStatistic()
         {
-            return _binItems == null ? new List<Tuple<Decimal, Decimal, int>>() :
-                _binItems.Select(b => new Tuple<Decimal, Decimal, int>(b.Left, b.Right, b.Items.Count())).ToList();
+            var ret = new Dictionary<string, List<Tuple<Decimal, Decimal, int>>>();
+            if (_binItems == null) return null;
+
+            foreach (Series series in SeriesCollection.Where(s => s.GetType() != typeof(LineSeries)))
+            {
+                var category = series.Title;
+                var items = _binItems.Select(b => new Tuple<Decimal, Decimal, int>(b.Left, b.Right, b.Items.Count(i => category == null ? true : i.Category == category))).ToList();
+                ret.Add(category == null ? "" : category, items);
+            }
+
+            return ret;
         }
 
         public List<Tuple<string, Brush>> GetLegendInfo()

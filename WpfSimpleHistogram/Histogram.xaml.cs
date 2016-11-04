@@ -135,10 +135,10 @@ namespace WpfSimpleHistogram
         }
 
         /// <summary>
-        /// return number of items for each bin
+        /// return number of items for each category / bin
         /// </summary>
-        /// <returns>bin.Left, bin.Right, number of items</returns>
-        public List<Tuple<Decimal, Decimal, int>> GetStatistic()
+        /// <returns>category name => bin infos (left, right, count)</returns>
+        public Dictionary<string, List<Tuple<Decimal, Decimal, int>>> GetStatistic()
         {
             return (this.DataContext as HistogramViewModel).GetStatistic();
         }
