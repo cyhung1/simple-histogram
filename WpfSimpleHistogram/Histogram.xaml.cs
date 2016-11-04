@@ -31,12 +31,20 @@ namespace WpfSimpleHistogram
 
         public static readonly RoutedEvent BarClickedEvent = EventManager.RegisterRoutedEvent("BarClicked", RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(Histogram));
 
+        public static readonly RoutedEvent UpdaterTickEvent = EventManager.RegisterRoutedEvent("UpdaterTick", RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(Histogram));
+
         public event RoutedEventHandler BarClicked
         {
             add { AddHandler(BarClickedEvent, value); }
             remove { RemoveHandler(BarClickedEvent, value); }
         }
 
+        public event RoutedEventHandler UpdaterTick
+        {
+            add { AddHandler(UpdaterTickEvent, value); }
+            remove { RemoveHandler(UpdaterTickEvent, value); }
+        }
+        
         public string YLabel
         {
             get { return (string)GetValue(YLabelProperty); }
@@ -109,7 +117,7 @@ namespace WpfSimpleHistogram
             InitializeComponent();
         }
 
-        void CartesianChart_DataClick(object sender, LiveCharts.ChartPoint chartPoint)
+        void chart_DataClick(object sender, LiveCharts.ChartPoint chartPoint)
         {
             if (chartPoint.SeriesView == null || (chartPoint.SeriesView.GetType() != typeof(ColumnSeries) && chartPoint.SeriesView.GetType() != typeof(StackedColumnSeries))) return;
 
@@ -117,6 +125,12 @@ namespace WpfSimpleHistogram
             ClickedItems = (this.DataContext as HistogramViewModel).GetClickedItems(chartPoint.X, tgtCategory);
 
             var eventArgs = new RoutedEventArgs(Histogram.BarClickedEvent);
+            RaiseEvent(eventArgs);
+        }
+
+        void chart_UpdaterTick()
+        {
+            var eventArgs = new RoutedEventArgs(Histogram.UpdaterTickEvent);
             RaiseEvent(eventArgs);
         }
 

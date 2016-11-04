@@ -14,7 +14,7 @@
         </Style>
         <lvc:Separator x:Key="cvSeparator"/>
     </UserControl.Resources>
-    <lvc:CartesianChart x:Name="chart" Series="{Binding SeriesCollection}" DataClick="CartesianChart_DataClick" LegendLocation="Right">
+    <lvc:CartesianChart x:Name="chart" Series="{Binding SeriesCollection}" DataClick="chart_DataClick" LegendLocation="Right" UpdaterTick="chart_UpdaterTick">
         <lvc:CartesianChart.AxisX>
             <lvc:Axis Title="" Labels="{Binding Labels}" ShowLabels="False"></lvc:Axis>
             <lvc:Axis x:Name="curveAxis" Title="{Binding XLabel}" Labels="{Binding CurveAxisLabels}" Separator="{StaticResource cvSeparator}"></lvc:Axis>
