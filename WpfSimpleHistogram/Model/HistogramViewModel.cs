@@ -312,6 +312,18 @@ namespace WpfSimpleHistogram.Model
                 _binItems.Select(b => new Tuple<Decimal, Decimal, int>(b.Left, b.Right, b.Items.Count())).ToList();
         }
 
+        public List<Tuple<string, Brush>> GetLegendInfo()
+        {
+            var ret = new List<Tuple<string, Brush>>();
+            foreach (var s in SeriesCollection.Where(s => s.GetType() != typeof(LineSeries)))
+            {
+                var series = s as Series;
+                ret.Add(new Tuple<string, Brush>(series.Title, series.Fill));
+            }
+
+            return ret;
+        }
+
         #region INotifyPropertyChanged
         public event PropertyChangedEventHandler PropertyChanged;
         private void RaisePropertyChanged(string propertyName)

@@ -5,6 +5,7 @@ using System.Windows.Controls;
 using WpfSimpleHistogram.Interface;
 using WpfSimpleHistogram.Model;
 using System;
+using System.Windows.Media;
 
 namespace WpfSimpleHistogram
 {
@@ -126,6 +127,11 @@ namespace WpfSimpleHistogram
         public List<Tuple<Decimal, Decimal, int>> GetStatistic()
         {
             return (this.DataContext as HistogramViewModel).GetStatistic();
+        }
+
+        public List<Tuple<string, Brush>> GetLegendInfo()
+        {
+            return (this.DataContext as HistogramViewModel).GetLegendInfo();
         }
     }
 }

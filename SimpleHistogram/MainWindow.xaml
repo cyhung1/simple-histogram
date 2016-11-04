@@ -30,8 +30,9 @@
             <TextBlock Margin="10,0,0,5" Text="Categories:" VerticalAlignment="Top"/>
             <RadioButton GroupName="dataType" x:Name="singleCategory" Checked="singleCategory_Checked" Unchecked="singleCategory_Checked"  VerticalAlignment="Top">Single</RadioButton>
             <RadioButton GroupName="dataType" x:Name="multipleCategory" Margin="5,0" VerticalAlignment="Top">Multiple</RadioButton>
+            <Button Margin="10,0,0,5" Content="Show Legend Info" Click="ShowLegendButton_Click"/>
         </StackPanel>
-        <hist:Histogram Grid.Row="1" ShowCurve="{Binding ElementName=showCurve, Path=IsChecked}"
+        <hist:Histogram x:Name="histogram" Grid.Row="1" ShowCurve="{Binding ElementName=showCurve, Path=IsChecked}"
             YLabel="Count" XLabel="Value (mm)" BinSize="{Binding ElementName=binSize, Path=SelectedValue, Converter={StaticResource StrToDoubleConv}}"
             ItemsSource="{Binding ElementName=control, Path=Items}" 
             BarClicked="Histogram_BarClicked"/>

@@ -101,6 +101,22 @@ namespace SimpleHistogram
             MessageBox.Show("This bar holds: Item Id " + items.Select(i => ((Item)i).ItemId.ToString()).Aggregate((a, b) => { return a + ", " + b; }), "Bar clicked");
         }
 
+        private void ShowLegendButton_Click(object sender, RoutedEventArgs e)
+        {
+            var items = histogram.GetLegendInfo();
+            var st1 = new StackPanel() { Orientation = Orientation.Vertical };
+
+            foreach (var item in items)
+            {
+                var st2 = new StackPanel() { Orientation = Orientation.Horizontal, Margin = new Thickness(5, 0, 5, 0) };
+                st2.Children.Add(new Rectangle() { Fill = item.Item2, Width = 20, Height = 20 });
+                st2.Children.Add(new TextBlock() { Text = item.Item1, Margin = new Thickness(5, 0, 5, 0) });
+                st1.Children.Add(st2);
+            }
+            var win = new Window() { Width = 100, Height = 100, Content = st1, Title = "Legend Information", WindowStartupLocation = System.Windows.WindowStartupLocation.CenterOwner };
+            win.ShowDialog();
+        }
+
         #region INotifyPropertyChanged
         public event PropertyChangedEventHandler PropertyChanged;
         private void RaisePropertyChanged(string propertyName)
@@ -113,6 +129,7 @@ namespace SimpleHistogram
             }
         }
         #endregion
+
     }
 
     public class Item : IHistogramItem
