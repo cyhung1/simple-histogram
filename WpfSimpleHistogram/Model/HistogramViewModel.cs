@@ -249,13 +249,16 @@ namespace WpfSimpleHistogram.Model
             var lineSeries = new LineSeries()
             {
                 Values = new ChartValues<double>(bLabels.Select(v => GetGaussian(v, a, u, stdDev, (double)(bins[0].Right - bins[0].Left), (double)allValues.Count()))),
+                Title = "",
                 ScalesXAt = 1,
                 LineSmoothness = 1, //smooth
                 PointGeometry = null,
                 Fill = Brushes.Transparent,
+                Stroke = Brushes.Gray,
+                StrokeThickness = 2,
+                LabelPoint = o => ((double)o.Instance).ToString("0.00"),
             };
             lineSeries.SetBinding(LineSeries.VisibilityProperty, new Binding("BellCurveVisibility") { Source = this });
-
             SeriesCollection.Add(lineSeries);
         }
 

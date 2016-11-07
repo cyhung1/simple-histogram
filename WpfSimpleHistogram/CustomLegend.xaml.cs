@@ -17,7 +17,7 @@ namespace WpfSimpleHistogram
             get { return _series; }
             set
             {
-                _series = value == null ? null : value.Where(s => s.Title != "Series").ToList();
+                _series = value == null ? null : value.Where(s => s.Title != "").ToList();
                 OnPropertyChanged("Series");
             }
         }

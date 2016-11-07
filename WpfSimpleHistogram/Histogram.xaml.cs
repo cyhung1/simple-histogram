@@ -160,5 +160,10 @@ namespace WpfSimpleHistogram
         {
             return (this.DataContext as HistogramViewModel).GetLegendInfo();
         }
+
+        private void chart_ToolTipOpening(object sender, ToolTipEventArgs e)
+        {
+
+        }
     }
 }
