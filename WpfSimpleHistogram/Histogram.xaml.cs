@@ -7,6 +7,9 @@ using WpfSimpleHistogram.Model;
 using System;
 using System.Windows.Media;
 using LiveCharts.Wpf.Charts.Base;
+using System.Timers;
+using System.Windows.Shapes;
+using System.Linq;
 
 namespace WpfSimpleHistogram
 {
@@ -112,6 +115,8 @@ namespace WpfSimpleHistogram
             if (needUpdate) view.chart.Update();
         }
 
+        Timer _updateTimer = new Timer() { Interval = 50 };
+
         public Histogram()
         {
             this.DataContext = new HistogramViewModel();
@@ -128,6 +133,9 @@ namespace WpfSimpleHistogram
                 Color.FromArgb(0x80, 0xa0, 0x52, 0x2d),
                 Color.FromArgb(0x80, 0xb2, 0xc0, 0xb2),
             };
+
+            _updateTimer.Elapsed += updateTimer_Elapsed;
+            _updateTimer.Start();
         }
 
         void chart_DataClick(object sender, LiveCharts.ChartPoint chartPoint)
@@ -159,6 +167,84 @@ namespace WpfSimpleHistogram
         public List<Tuple<string, Brush>> GetLegendInfo()
         {
             return (this.DataContext as HistogramViewModel).GetLegendInfo();
+        }
+
+        void updateTimer_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                DrawAxisLines();
+            });
+        }
+
+        Point _zeroPoint = new Point(0, 0);
+
+        #region Axis Lines
+
+        Line _xAxisLine;
+        Line _yAxisLine;
+
+        void DrawAxisLines()
+        {
+            var canvas = chart.GetCanvas() as Canvas;
+            var originPoint = GetChartEdgePoint(ChartEdge.BottomLeft);
+            var trPoint = GetChartEdgePoint(ChartEdge.TopRight);
+
+            if (_xAxisLine == null)
+            {
+                _xAxisLine = CreateLine("XAxis", true);
+                canvas.Children.Add(_xAxisLine);
+            }
+            _xAxisLine.X1 = originPoint.X;
+            _xAxisLine.Y1 = originPoint.Y;
+            _xAxisLine.X2 = trPoint.X;
+            _xAxisLine.Y2 = originPoint.Y;
+
+            if (_yAxisLine == null)
+            {
+                _yAxisLine = CreateLine("YAxis", true);
+                canvas.Children.Add(_yAxisLine);
+            }
+            _yAxisLine.X1 = originPoint.X;
+            _yAxisLine.Y1 = originPoint.Y;
+            _yAxisLine.X2 = originPoint.X;
+            _yAxisLine.Y2 = trPoint.Y;
+        }
+
+        #endregion
+
+        Line CreateLine(string tag = null, bool isThinLine = false)
+        {
+            var ret = new Line() { StrokeThickness = isThinLine ? 1 : 2, Stroke = Brushes.Black };
+            if (tag != null) ret.Tag = tag;
+            return ret;
+        }
+
+        IEnumerable<object> GetChildrenFromCanvas(Type t)
+        {
+            var canvas = chart.GetCanvas() as Canvas;
+            foreach (var c in canvas.Children)
+            {
+                if (c.GetType() == t) yield return c;
+            }
+        }
+
+        enum ChartEdge { BottomLeft, TopLeft, BottomRight, TopRight }
+        Point GetChartEdgePoint(ChartEdge edge)
+        {
+            var lines = GetChildrenFromCanvas(typeof(Line)).Select(c => (Line)c).Where(c => c.Tag == null);
+
+            switch (edge)
+            {
+                case ChartEdge.BottomLeft:
+                    return new Point(lines.Select(l => Math.Min(l.X1, l.X2)).Min(), lines.Select(l => Math.Max(l.Y1, l.Y2)).Max());
+                case ChartEdge.TopLeft:
+                    return new Point(lines.Select(l => Math.Min(l.X1, l.X2)).Min(), lines.Select(l => Math.Min(l.Y1, l.Y2)).Min());
+                case ChartEdge.BottomRight:
+                    return new Point(lines.Select(l => Math.Max(l.X1, l.X2)).Max(), lines.Select(l => Math.Max(l.Y1, l.Y2)).Max());
+                default:
+                    return new Point(lines.Select(l => Math.Max(l.X1, l.X2)).Max(), lines.Select(l => Math.Min(l.Y1, l.Y2)).Min());
+            }
         }
     }
 }
