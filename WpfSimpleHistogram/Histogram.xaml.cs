@@ -84,26 +84,26 @@ namespace WpfSimpleHistogram
         static void LabelChanged(DependencyObject obj, DependencyPropertyChangedEventArgs e)
         {
             var view = obj as Histogram;
-            (view.DataContext as HistogramViewModel).XLabel = view.XLabel;
-            (view.DataContext as HistogramViewModel).YLabel = view.YLabel;
+            (view.DataContext as HistogramVM).XLabel = view.XLabel;
+            (view.DataContext as HistogramVM).YLabel = view.YLabel;
         }
 
         static void ItemsSourceChanged(DependencyObject obj, DependencyPropertyChangedEventArgs e)
         {
             var view = obj as Histogram;
-            (view.DataContext as HistogramViewModel).ItemsSource = view.ItemsSource;
+            (view.DataContext as HistogramVM).ItemsSource = view.ItemsSource;
         }
 
         static void BinSizeChanged(DependencyObject obj, DependencyPropertyChangedEventArgs e)
         {
             var view = obj as Histogram;
-            (view.DataContext as HistogramViewModel).BinSize = view.BinSize;
+            (view.DataContext as HistogramVM).BinSize = view.BinSize;
         }
 
         static void ShowCurveChanged(DependencyObject obj, DependencyPropertyChangedEventArgs e)
         {
             var view = obj as Histogram;
-            (view.DataContext as HistogramViewModel).BellCurveVisibility = view.ShowCurve ? Visibility.Visible : Visibility.Hidden;
+            (view.DataContext as HistogramVM).BellCurveVisibility = view.ShowCurve ? Visibility.Visible : Visibility.Hidden;
 
             //check curve visibility: sometimes binding does not work...
             var needUpdate = false;
@@ -119,7 +119,7 @@ namespace WpfSimpleHistogram
 
         public Histogram()
         {
-            this.DataContext = new HistogramViewModel();
+            this.DataContext = new HistogramVM();
             InitializeComponent();
 
             Chart.Colors = new List<Color>
@@ -143,7 +143,7 @@ namespace WpfSimpleHistogram
             if (chartPoint.SeriesView == null || (chartPoint.SeriesView.GetType() != typeof(ColumnSeries) && chartPoint.SeriesView.GetType() != typeof(StackedColumnSeries))) return;
 
             var tgtCategory = chartPoint.SeriesView.GetType() == typeof(StackedColumnSeries) ? (chartPoint.SeriesView as StackedColumnSeries).Title : null;
-            ClickedItems = (this.DataContext as HistogramViewModel).GetClickedItems(chartPoint.X, tgtCategory);
+            ClickedItems = (this.DataContext as HistogramVM).GetClickedItems(chartPoint.X, tgtCategory);
 
             var eventArgs = new RoutedEventArgs(Histogram.BarClickedEvent);
             RaiseEvent(eventArgs);
@@ -161,12 +161,12 @@ namespace WpfSimpleHistogram
         /// <returns>category name => bin infos (left, right, count)</returns>
         public Dictionary<string, List<Tuple<Decimal, Decimal, int>>> GetStatistic()
         {
-            return (this.DataContext as HistogramViewModel).GetStatistic();
+            return (this.DataContext as HistogramVM).GetStatistic();
         }
 
         public List<Tuple<string, Brush>> GetLegendInfo()
         {
-            return (this.DataContext as HistogramViewModel).GetLegendInfo();
+            return (this.DataContext as HistogramVM).GetLegendInfo();
         }
 
         void updateTimer_Elapsed(object sender, ElapsedEventArgs e)

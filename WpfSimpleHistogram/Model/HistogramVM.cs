@@ -12,7 +12,7 @@ using WpfSimpleHistogram.Interface;
 
 namespace WpfSimpleHistogram.Model
 {
-    public class HistogramViewModel : INotifyPropertyChanged
+    public class HistogramVM : INotifyPropertyChanged
     {
         string _xLabel;
         public string XLabel
@@ -81,7 +81,7 @@ namespace WpfSimpleHistogram.Model
             }
         }
 
-        public HistogramViewModel()
+        public HistogramVM()
         {
             Formatter = value => value.ToString("0");
             SeriesCollection = new SeriesCollection();

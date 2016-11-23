@@ -55,7 +55,7 @@
       <DependentUpon>CustomLegend.xaml</DependentUpon>
     </Compile>
     <Compile Include="Interface\IHistogramItem.cs" />
-    <Compile Include="Model\HistogramViewModel.cs" />
+    <Compile Include="Model\HistogramVM.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Histogram.xaml.cs">
       <DependentUpon>Histogram.xaml</DependentUpon>
