@@ -18,11 +18,14 @@ namespace WpfSimpleHistogram
     /// </summary>
     public partial class Histogram : UserControl
     {
-        public static readonly DependencyProperty YLabelProperty = DependencyProperty.Register("YLabel", typeof(string), 
+        public static readonly DependencyProperty YLabelProperty = DependencyProperty.Register("YLabel", typeof(string),
             typeof(Histogram), new FrameworkPropertyMetadata("Frequency", new PropertyChangedCallback(LabelChanged)));
 
         public static readonly DependencyProperty XLabelProperty = DependencyProperty.Register("XLabel", typeof(string),
             typeof(Histogram), new FrameworkPropertyMetadata("Measures", new PropertyChangedCallback(LabelChanged)));
+
+        public static readonly DependencyProperty XLabelDecimalsProperty = DependencyProperty.Register("XLabelDecimals", typeof(int),
+            typeof(Histogram), new FrameworkPropertyMetadata(0, new PropertyChangedCallback(XLabelDecimalsChanged)));
 
         public static readonly DependencyProperty ItemsSourceProperty = DependencyProperty.Register("ItemsSource", typeof(IEnumerable<IHistogramItem>),
             typeof(Histogram), new FrameworkPropertyMetadata(new List<IHistogramItem>(), new PropertyChangedCallback(ItemsSourceChanged)));
@@ -48,7 +51,7 @@ namespace WpfSimpleHistogram
             add { AddHandler(UpdaterTickEvent, value); }
             remove { RemoveHandler(UpdaterTickEvent, value); }
         }
-        
+
         public string YLabel
         {
             get { return (string)GetValue(YLabelProperty); }
@@ -59,6 +62,12 @@ namespace WpfSimpleHistogram
         {
             get { return (string)GetValue(XLabelProperty); }
             set { SetValue(XLabelProperty, value); }
+        }
+
+        public int XLabelDecimals
+        {
+            get { return (int)GetValue(XLabelDecimalsProperty); }
+            set { SetValue(XLabelDecimalsProperty, value); }
         }
 
         public IEnumerable<IHistogramItem> ItemsSource
@@ -88,6 +97,12 @@ namespace WpfSimpleHistogram
             (view.DataContext as HistogramVM).YLabel = view.YLabel;
         }
 
+        static void XLabelDecimalsChanged(DependencyObject obj, DependencyPropertyChangedEventArgs e)
+        {
+            var view = obj as Histogram;
+            (view.DataContext as HistogramVM).XLabelDecimals = view.XLabelDecimals;
+        }
+
         static void ItemsSourceChanged(DependencyObject obj, DependencyPropertyChangedEventArgs e)
         {
             var view = obj as Histogram;
@@ -103,7 +118,7 @@ namespace WpfSimpleHistogram
         static void ShowCurveChanged(DependencyObject obj, DependencyPropertyChangedEventArgs e)
         {
             var view = obj as Histogram;
-            (view.DataContext as HistogramVM).BellCurveVisibility = view.ShowCurve ? Visibility.Visible : Visibility.Hidden;
+            (view.DataContext as HistogramVM).ShowCurve = view.ShowCurve;
 
             //check curve visibility: sometimes binding does not work...
             var needUpdate = false;
@@ -116,6 +131,18 @@ namespace WpfSimpleHistogram
         }
 
         Timer _updateTimer = new Timer() { Interval = 50 };
+
+        public List<double> BellCurvePoints
+        {
+            get
+            {
+                var ret = new List<double>();
+                if (!ShowCurve || !(DataContext is HistogramVM))
+                    return ret;
+
+                return new List<double>((DataContext as HistogramVM).BellCurvePoints);
+            }
+        }
 
         public Histogram()
         {

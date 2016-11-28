@@ -64,27 +64,44 @@ namespace WpfSimpleHistogram.Model
             }
         }
 
+        int _xLabelDecimals;
+        public int XLabelDecimals
+        {
+            get { return _xLabelDecimals; }
+            set
+            {
+                _xLabelDecimals = value;
+                DrawGraph(_itemsSource, (Decimal)BinSize);
+                RaisePropertyChanged("XLabelDecimals");
+            }
+        }
+
+        bool _showCurve = true;
+        public bool ShowCurve
+        {
+            get { return _showCurve; }
+            set
+            {
+                _showCurve = value;
+                ChangeCurveVis();
+            }
+        }
+
         public Func<double, string> Formatter { get; set; }
 
         public SeriesCollection SeriesCollection { get; private set; }
         public string[] Labels { get; private set; }
         public string[] CurveAxisLabels { get; private set; }
 
-        Visibility _bellCurveVisibilyty = Visibility.Visible;
-        public Visibility BellCurveVisibility
-        {
-            get { return _bellCurveVisibilyty; }
-            set
-            {
-                _bellCurveVisibilyty = value;
-                RaisePropertyChanged("BellCurveVisibility");
-            }
-        }
-
         public HistogramVM()
         {
-            Formatter = value => value.ToString("0");
+            Formatter = v => v.ToString("0");
             SeriesCollection = new SeriesCollection();
+        }
+
+        public string GetFormatStr(int dNum)
+        {
+            return "0" + (dNum > 0 ? "." + new string('0', dNum) : "");
         }
 
         double GetProperBinSize()
@@ -120,10 +137,11 @@ namespace WpfSimpleHistogram.Model
 
             DrawHistogram(_binItems, _categories);
             DrawBellCurve(_binItems);
-            
+
             RaisePropertyChanged("SeriesCollection");
             RaisePropertyChanged("Labels");
             RaisePropertyChanged("CurveAxisLabels");
+            ChangeCurveVis();
         }
 
         List<Bin> GetBinItems(IEnumerable<IHistogramItem> items, Decimal binSize)
@@ -140,14 +158,14 @@ namespace WpfSimpleHistogram.Model
             var sortedItems = items.OrderBy(i => i.XValue).ToList();
 
             var val = GetStartVal((Decimal)sortedItems[0].XValue, binSize);
-            ret.Add(new Bin(val, val + binSize));
+            ret.Add(new Bin(this, val, val + binSize));
 
             for (int i = 0; i < sortedItems.Count(); i++)
             {
                 while ((Decimal)sortedItems[i].XValue >= ret.Last().Right)
                 {
                     val += binSize;
-                    ret.Add(new Bin(val, val + binSize));
+                    ret.Add(new Bin(this, val, val + binSize));
                 }
                 ret.Last().Items.Add(sortedItems[i]);
             }
@@ -178,14 +196,20 @@ namespace WpfSimpleHistogram.Model
         {
             public string Title
             {
-                get { return Left.ToString("0.00") + "-" + Right.ToString("0.00"); }
+                get
+                {
+                    return Left.ToString(_model.GetFormatStr(_model.XLabelDecimals)) + "-" + Right.ToString(_model.GetFormatStr(_model.XLabelDecimals));
+                }
             }
             public Decimal Left;
             public Decimal Right;
             public List<IHistogramItem> Items;
 
-            public Bin(Decimal left, Decimal right)
+            HistogramVM _model;
+
+            public Bin(HistogramVM model, Decimal left, Decimal right)
             {
+                _model = model;
                 Left = left;
                 Right = right;
                 Items = new List<IHistogramItem>();
@@ -206,7 +230,7 @@ namespace WpfSimpleHistogram.Model
                     Cursor = Cursors.Hand,
                     DataLabels = true,
                     ColumnPadding = 0.5,
-                    MaxColumnWidth = 1000
+                    MaxColumnWidth = 1000,
                 });
             }
             else
@@ -227,12 +251,18 @@ namespace WpfSimpleHistogram.Model
             }
         }
 
+        private List<double> _bellCurvePoints = new List<double>();
+        public IEnumerable<double> BellCurvePoints
+        {
+            get { return _bellCurvePoints.Select(s => s); }
+        }
+
         void DrawBellCurve(List<Bin> bins)
         {
             if (bins.Count() == 0) return;
 
             var bLabels = GetBellLabels(bins);
-            CurveAxisLabels = bLabels.Select(b => b.ToString()).ToArray();
+            CurveAxisLabels = bLabels.Select(b => b.ToString(GetFormatStr(XLabelDecimals))).ToArray();
 
             var allValues = new List<double>();
             foreach (var bin in bins)
@@ -246,9 +276,13 @@ namespace WpfSimpleHistogram.Model
             var stdDev = Math.Sqrt(variance);
             var a = 1.0 / (stdDev * Math.Sqrt(2.0 * Math.PI));
 
+            var binRange = (double)(bins[0].Right - bins[0].Left);
+            var binCount = (double)allValues.Count;
+            _bellCurvePoints = bLabels.Select(v => GetGaussian(v, a, u, stdDev, binRange, binCount)).ToList();
+
             var lineSeries = new LineSeries()
             {
-                Values = new ChartValues<double>(bLabels.Select(v => GetGaussian(v, a, u, stdDev, (double)(bins[0].Right - bins[0].Left), (double)allValues.Count()))),
+                Values = new ChartValues<double>(_bellCurvePoints),
                 Title = "",
                 ScalesXAt = 1,
                 LineSmoothness = 1, //smooth
@@ -256,10 +290,17 @@ namespace WpfSimpleHistogram.Model
                 Fill = Brushes.Transparent,
                 Stroke = Brushes.Gray,
                 StrokeThickness = 2,
-                LabelPoint = o => ((double)o.Instance).ToString("0.00"),
+                LabelPoint = o => ((double)o.Instance).ToString(GetFormatStr(XLabelDecimals)),
             };
-            lineSeries.SetBinding(LineSeries.VisibilityProperty, new Binding("BellCurveVisibility") { Source = this });
             SeriesCollection.Add(lineSeries);
+        }
+
+        void ChangeCurveVis()
+        {
+            // cannot use Visibility dependency prop on LineSeries that causes weired label issue...
+            var line = SeriesCollection.FirstOrDefault(s => s.GetType() == typeof(LineSeries)) as LineSeries;
+            if (line == null) return;
+            line.Stroke = ShowCurve ? Brushes.Gray : Brushes.Transparent;
         }
 
         double GetGaussian(double x, double a, double u, double stdDev, double binSize, double numOfRec)

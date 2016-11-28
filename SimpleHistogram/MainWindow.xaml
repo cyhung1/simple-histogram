@@ -33,8 +33,9 @@
             <Button Margin="10,0,0,5" Content="Show Legend Info" Click="ShowLegendButton_Click"/>
         </StackPanel>
         <hist:Histogram x:Name="histogram" Grid.Row="1" ShowCurve="{Binding ElementName=showCurve, Path=IsChecked}"
-            YLabel="Count" XLabel="Value (mm)" BinSize="{Binding ElementName=binSize, Path=SelectedValue, Converter={StaticResource StrToDoubleConv}}"
-            ItemsSource="{Binding ElementName=control, Path=Items}" 
-            BarClicked="Histogram_BarClicked"/>
+                        YLabel="Count" XLabel="Value (mm)" XLabelDecimals="2"
+                        BinSize="{Binding ElementName=binSize, Path=SelectedValue, Converter={StaticResource StrToDoubleConv}}"
+                        ItemsSource="{Binding ElementName=control, Path=Items}" 
+                        BarClicked="Histogram_BarClicked"/>
     </Grid>
 </Window>
